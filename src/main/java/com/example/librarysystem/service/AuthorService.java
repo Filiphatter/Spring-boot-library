@@ -32,7 +32,6 @@ public class AuthorService {
                 .collect(Collectors.toList());
     }
 
-
     public List<AuthorSearchDTO> searchAuthorLastName(String lastName) {
         if (!StringUtils.hasText(lastName)) {
             throw new IllegalArgumentException("Efternamn får inte vara tomt vid sökning");
@@ -88,5 +87,4 @@ public class AuthorService {
                 books
         );
     }
-
 }

@@ -106,7 +106,5 @@ public class LoanService {
         dto.setBookTitle(loan.getBook().getTitle());
         return dto;
     }
-
-
 }
 

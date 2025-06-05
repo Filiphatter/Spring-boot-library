@@ -14,7 +14,7 @@ public class Book {
     @Column(name = "book_id")  // Måste matcha kolumnnamnet i DB
     private Long bookId;
 
-    //information
+    //info
     @Column(name = "title")
     private String title;
 

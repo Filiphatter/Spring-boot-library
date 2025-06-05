@@ -63,14 +63,14 @@ public class BookService {
     public Book createBook(BookRequestDTO dto) {
         validateBookRequest(dto);
 
-        Author author = authorRepository.findById(dto.authorId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Författare med ID " + dto.authorId + " hittades inte."));
+        Author author = authorRepository.findById(dto.getAuthorId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Författare med ID " + dto.getAuthorId() + " hittades inte."));
 
         Book book = new Book();
-        book.setTitle(dto.title);
-        book.setPublicationYear(dto.publicationYear);
-        book.setAvailableCopies(dto.availableCopies);
-        book.setTotalCopies(dto.totalCopies);
+        book.setTitle(dto.getTitle());
+        book.setPublicationYear(dto.getPublicationYear());
+        book.setAvailableCopies(dto.getAvailableCopies());
+        book.setTotalCopies(dto.getTotalCopies());
         book.setAuthor(author);
 
         return bookRepository.save(book);
@@ -82,19 +82,19 @@ public class BookService {
             throw new IllegalArgumentException("Bokdata får inte vara null.");
         }
 
-        if (!StringUtils.hasText(dto.title)) {
+        if (!StringUtils.hasText(dto.getTitle())) {
             throw new IllegalArgumentException("Titel krävs.");
         }
 
-        if (dto.publicationYear <= 0) {
+        if (dto.getPublicationYear() <= 0) {
             throw new IllegalArgumentException("Ogiltigt publiceringsår.");
         }
 
-        if (dto.availableCopies < 0 || dto.totalCopies < 0) {
+        if (dto.getAvailableCopies() < 0 || dto.getTotalCopies() < 0) {
             throw new IllegalArgumentException("Antalet kopior kan inte vara negativt.");
         }
 
-        if (dto.availableCopies > dto.totalCopies) {
+        if (dto.getAvailableCopies() > dto.getTotalCopies()) {
             throw new IllegalArgumentException("Tillgängliga kopior kan inte vara fler än totalt antal.");
         }
     }
