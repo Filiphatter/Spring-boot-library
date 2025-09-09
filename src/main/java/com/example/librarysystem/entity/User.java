@@ -4,6 +4,8 @@ package com.example.librarysystem.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -35,6 +37,15 @@ public class User {
     protected void onCreate() {
         this.registrationDate = LocalDate.now();
     }
+
+    //Roller kopplade till användaren
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles", // join-table mellan users och roles
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
     // Getters och Setters
     public Long getUserID() {
