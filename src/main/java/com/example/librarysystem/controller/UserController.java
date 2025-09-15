@@ -37,4 +37,17 @@ import org.springframework.web.bind.annotation.*;
         UserDTO created = userService.createUser(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
+
+    @PostMapping("/migrate-passwords")
+    public ResponseEntity<String> migratePasswords() {
+        try {
+            String result = userService.migrateExistingPasswords();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Fel vid migrering: " + e.getMessage());
+        }
+    }
+
+
 }
