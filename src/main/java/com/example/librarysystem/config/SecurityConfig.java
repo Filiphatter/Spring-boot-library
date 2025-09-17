@@ -15,12 +15,24 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                /*  ^ tabort om man ska aktivera, löste inte hur man testa detta
+                      .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyTrue())
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+
+                        CSRF skydd, CSRF är når en webbsida "lurar" min browser att skicka request till applikationen när man är inloggad.
+                        utan skyddet kan en skapare förslagsvis skapa formurlär som raderar delar i databasen. Genom cookierepository så lagrar man tokens i session,
+                        Sedan cookieCSRFTokenRepo gör att man lagrar tokens i cookiesen istället.
+
+                        withHttpOnlyTrue så kan javascript INTE komma åt tokenen försvarar mer mot XSS-attacker. (tror jag)
+                        -.-.-false så kan javascript komma åt tokenen men ger mindre säkerhet.
+                */
+
                 .authorizeHttpRequests(auth -> auth
                         //Publika endpoints
                         .requestMatchers("/register", "/login").permitAll()
                         .requestMatchers("/auth/register").permitAll()
                         .requestMatchers("/books", "/books/search").permitAll()
-                        .requestMatchers("/test/**").permitAll() //ta bort senare
                         //.requestMatchers("/users/migrate-passwords").permitAll() för att migrera lösenord temporär lösning
 
                         //Kräver USER eller ADMIN
@@ -37,6 +49,7 @@ public class SecurityConfig {
                         //Allt annat kräver inloggning
                         .anyRequest().authenticated()
                 )
+
                 .httpBasic(Customizer.withDefaults()) //för postman basic auth enligt ai
                 .formLogin(form -> form
                         .permitAll() //Spring Securitys standard login form
@@ -46,6 +59,8 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
+
+
 
         return http.build();
     }

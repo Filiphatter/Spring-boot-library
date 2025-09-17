@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.*;
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    @PostMapping("/migrate-passwords")
+    /*@PostMapping("/migrate-passwords")
     public ResponseEntity<String> migratePasswords() {
         try {
             String result = userService.migrateExistingPasswords();
@@ -48,6 +48,6 @@ import org.springframework.web.bind.annotation.*;
                     .body("Fel vid migrering: " + e.getMessage());
         }
     }
-
+*/
 
 }

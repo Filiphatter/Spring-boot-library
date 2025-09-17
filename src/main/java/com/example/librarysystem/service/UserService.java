@@ -8,18 +8,18 @@ import com.example.librarysystem.entity.Role;
 import com.example.librarysystem.entity.User;
 import com.example.librarysystem.repository.RoleRepository;
 import com.example.librarysystem.repository.UserRepository;
+import jakarta.validation.ConstraintViolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.ExpressionException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
+import jakarta.validation.Validator;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -35,6 +35,9 @@ public class UserService {
     @Autowired
     private PasswordValidator passwordValidator;
 
+    @Autowired
+    private Validator validator; //spring validation
+
         public UserService(UserRepository userRepository) {
             this.userRepository = userRepository;
         }
@@ -45,13 +48,27 @@ public class UserService {
         }
 
     public UserDTO createUser(UserRequestDTO dto) {
-        validateUserInput(dto);
+        //Validera DTO-reglerna manuellt
+        Set<ConstraintViolation<UserRequestDTO>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder(); //Nytt (kanske inte) som jag fick hjälp av ai. Stringbuilder är str1 + str2 som en string. alltså addera ihop strings.
+            for (ConstraintViolation<UserRequestDTO> violation : violations) {
+                sb.append(violation.getMessage()).append("; "); //append konverterar andra datatyper til strängar (kanske inte nytt utan jag bara glömt)
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sb.toString());
+        }
 
-        // Kontrollera om e-post redan finns
+        //Extra lösenordsvalidering med din PasswordValidator
+        if (!passwordValidator.isValid(dto.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, passwordValidator.getPasswordRequirements());
+        }
+
+        //Kolla e-post unikhet
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "E-postadressen är redan registrerad.");
         }
 
+        //Skapa användare
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "USER-roll finns inte"));
 
@@ -59,30 +76,12 @@ public class UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword())); // krypterar den gammla metoden också
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRegistrationDate(LocalDate.now());
-        user.getRoles().add(userRole); //också updaterat för nya uppgiften
+        user.getRoles().add(userRole);
 
         User saved = userRepository.save(user);
         return mapToUserDTO(saved);
-    }
-
-    private void validateUserInput(UserRequestDTO dto) {
-        if (dto.getFirstName() == null || dto.getFirstName().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Förnamn är obligatoriskt.");
-        }
-        if (dto.getLastName() == null || dto.getLastName().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Efternamn är obligatoriskt.");
-        }
-        if (dto.getEmail() == null || dto.getEmail().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "E-postadress är obligatorisk.");
-        }
-        if (dto.getPassword() == null || dto.getPassword().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lösenord är obligatoriskt.");
-        }
-        if (!passwordValidator.isValid(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, passwordValidator.getPasswordRequirements());
-        } //updaterar validering
     }
 
     //nya metoder för security uppgifter
