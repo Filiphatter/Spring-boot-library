@@ -85,34 +85,43 @@ public class UserService {
     }
 
     //nya metoder för security uppgifter
-    public UserDTO registerUser(RegistrationRequestDTO dto) throws Exception {
-            //kontroller email
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new Exception("En användare finns redan med denna epost.");
+    public UserDTO registerUser(RegistrationRequestDTO dto) {
+        // Validera DTO-reglerna (NotBlank, Size, Email)
+        Set<ConstraintViolation<RegistrationRequestDTO>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (ConstraintViolation<RegistrationRequestDTO> violation : violations) {
+                sb.append(violation.getMessage()).append("; ");
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sb.toString());
         }
 
-        //Validera lösenord
+        // Validera lösenordspolicyn
         if (!passwordValidator.isValid(dto.getPassword())) {
-            throw new Exception(passwordValidator.getPasswordRequirements());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, passwordValidator.getPasswordRequirements());
         }
-        //get USER-rollen
-        Role userRole = roleRepository.findByName("USER")
-                .orElseThrow(() -> new Exception("USER-roll finns inte i systemet"));
 
-        //skapa användare
+        // Kontrollera att e-post inte redan finns
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-postadressen är redan registrerad.");
+        }
+
+        // Hämta USER-roll
+        Role userRole = roleRepository.findByName("USER")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "USER-roll finns inte i systemet"));
+
+        // Skapa användare
         User user = new User();
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword())); //själva krypteringen
+        user.setPassword(passwordEncoder.encode(dto.getPassword())); // kryptera lösenord
         user.getRoles().add(userRole);
 
-        // spara användare
+        // Spara och returnera DTO
         User savedUser = userRepository.save(user);
-        //retunera användare utan lösenord
         return mapToUserDTO(savedUser);
     }
-
 
     @Transactional // migrera lösenord till BC (ai)
     public String migrateExistingPasswords() {

@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 public class SecurityConfig {
@@ -14,18 +15,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+
+                //.csrf(csrf -> csrf
+                 //       .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                //)
                 .csrf(csrf -> csrf.disable())
-                /*  ^ tabort om man ska aktivera, löste inte hur man testa detta
-                      .csrf(csrf -> csrf
+                /*      .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyTrue())
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+
+                    löste inte testandet av detta
 
                         CSRF skydd, CSRF är når en webbsida "lurar" min browser att skicka request till applikationen när man är inloggad.
                         utan skyddet kan en skapare förslagsvis skapa formurlär som raderar delar i databasen. Genom cookierepository så lagrar man tokens i session,
                         Sedan cookieCSRFTokenRepo gör att man lagrar tokens i cookiesen istället.
 
                         withHttpOnlyTrue så kan javascript INTE komma åt tokenen försvarar mer mot XSS-attacker. (tror jag)
-                        -.-.-false så kan javascript komma åt tokenen men ger mindre säkerhet.
+                        -.-.-false så kan javascript komma åt tokenen men ger mindre säkerhet. Med false i produktion och pushande till live kör man true.
                 */
 
                 .authorizeHttpRequests(auth -> auth
