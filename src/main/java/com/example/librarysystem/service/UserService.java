@@ -84,7 +84,7 @@ public class UserService {
         return mapToUserDTO(saved);
     }
 
-    //nya metoder för security uppgifter
+
     public UserDTO registerUser(RegistrationRequestDTO dto) {
         // Validera DTO-reglerna (NotBlank, Size, Email)
         Set<ConstraintViolation<RegistrationRequestDTO>> violations = validator.validate(dto);
