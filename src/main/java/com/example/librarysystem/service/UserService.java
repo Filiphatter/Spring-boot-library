@@ -87,13 +87,15 @@ public class UserService {
 
     public UserDTO registerUser(RegistrationRequestDTO dto) {
         // Validera DTO-reglerna (NotBlank, Size, Email)
-        Set<ConstraintViolation<RegistrationRequestDTO>> violations = validator.validate(dto);
+        Set<ConstraintViolation<RegistrationRequestDTO>> violations = validator.validate(dto); //kör userrequestdto genom validator
         if (!violations.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(); //skapa stringbuilder
             for (ConstraintViolation<RegistrationRequestDTO> violation : violations) {
-                sb.append(violation.getMessage()).append("; ");
+                sb.append(violation.getMessage()).append("; "); //loopar igenom objektet med fel
             }
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sb.toString());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sb.toString()); //här samlas fel
+            //en vanlig exception är "allmän" aka spring vet inte vad de betyder. Response... kan man skriva vilken http statuskod och meddelande
+            //detta fallet är det bad request = 400 alltså en dålig request.
         }
 
         // Validera lösenordspolicyn
@@ -104,6 +106,7 @@ public class UserService {
         // Kontrollera att e-post inte redan finns
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "E-postadressen är redan registrerad.");
+            //Conflict är intressant iom man skicka en bra request jämfört med en 400, men systemet accepterar inte det detta fall eg unique constraint i DB.
         }
 
         // Hämta USER-roll
