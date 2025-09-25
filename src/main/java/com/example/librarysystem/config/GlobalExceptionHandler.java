@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
     // Hanterar ResponseStatusException (kastas ofta i service-lagret)
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
-        // Loggar intern info för mig
+        // Loggar internt info för mig
         logger.warn("ResponseStatusException: status={} reason={}", ex.getStatusCode(), ex.getReason());
         // Visa bara användarvänligt felmeddelande
         return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());

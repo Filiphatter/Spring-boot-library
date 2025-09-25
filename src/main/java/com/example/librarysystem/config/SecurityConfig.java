@@ -22,9 +22,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 /*      .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyTrue())
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 
-                    löste inte testandet av detta
+                        Om jag vill ha på med true eller false eller av helt o hållet. (av helt o hållet just nu för lättare testning.)
 
                         CSRF skydd, CSRF är når en webbsida "lurar" min browser att skicka request till applikationen när man är inloggad.
                         utan skyddet kan en skapare förslagsvis skapa formurlär som raderar delar i databasen. Genom cookierepository så lagrar man tokens i session,
@@ -39,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/register", "/login").permitAll()
                         .requestMatchers("/auth/register").permitAll()
                         .requestMatchers("/books", "/books/search").permitAll()
-                        //.requestMatchers("/users/migrate-passwords").permitAll() för att migrera lösenord temporär lösning
+                        //.requestMatchers("/users/migrate-passwords").permitAll() för att migrera lösenord temp lösning
 
                         //Kräver USER eller ADMIN
                         .requestMatchers("/loans/add").hasAnyRole("USER", "ADMIN")
@@ -56,9 +55,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                .httpBasic(Customizer.withDefaults()) //för postman basic auth enligt ai
+                .httpBasic(Customizer.withDefaults()) //för postman basic auth
                 .formLogin(form -> form
-                        .permitAll() //Spring Securitys standard login form
+                        .permitAll() //Spring Securities standard login form
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
